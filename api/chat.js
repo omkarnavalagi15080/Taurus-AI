@@ -44,7 +44,8 @@ export default async function handler(req, res) {
     return res.status(200).json({ reply });
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Server error" });
-  }
+  console.error("TAURUS ERROR:", error);
+  return res.status(500).json({
+    error: error.message || "Server error"
+  });
 }
