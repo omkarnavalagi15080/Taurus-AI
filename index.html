@@ -139,7 +139,7 @@
   <main class="app">
 
     <header>
-      <div class="logo">♉ Taurus AI</div>
+      <div class="logo">🐂 Taurus AI</div>
       <span>AI Assistant</span>
     </header>
 
@@ -147,7 +147,7 @@
 
       <h1>Build. Ask. Create.</h1>
 
-      <p>Your AI workspace is getting ready.</p>
+      <p>Your AI workspace is ready.</p>
 
       <div id="chat" class="chat">
         <div class="msg">
@@ -156,6 +156,7 @@
       </div>
 
       <div class="suggestions">
+
         <button onclick="ask('Explain this simply')">
           Explain simply
         </button>
@@ -167,6 +168,7 @@
         <button onclick="ask('Make a plan')">
           Make a plan
         </button>
+
       </div>
 
       <div class="composer">
@@ -185,7 +187,7 @@
       </div>
 
       <small>
-        Taurus AI • Demo version
+        Taurus AI • AI Assistant
       </small>
 
     </section>
@@ -193,15 +195,20 @@
   </main>
 
   <script>
+
     const chat = document.getElementById("chat");
     const input = document.getElementById("prompt");
 
     function addMessage(text, type) {
       const div = document.createElement("div");
+
       div.className = "msg " + type;
       div.textContent = text;
+
       chat.appendChild(div);
       chat.scrollTop = chat.scrollHeight;
+
+      return div;
     }
 
     function ask(text) {
@@ -209,7 +216,8 @@
       send();
     }
 
-    function send() {
+    async function send() {
+
       const text = input.value.trim();
 
       if (!text) return;
@@ -218,13 +226,50 @@
 
       input.value = "";
 
-      setTimeout(() => {
-        addMessage(
-          "Taurus AI: I'm currently in demo mode. Real AI will be connected soon 🚀",
-          "bot"
-        );
-      }, 500);
+      const thinking = addMessage(
+        "Taurus AI is thinking... 🤖",
+        "bot"
+      );
+
+      try {
+
+        const response = await fetch("/api/chat", {
+
+          method: "POST",
+
+          headers: {
+            "Content-Type": "application/json"
+          },
+
+          body: JSON.stringify({
+            message: text
+          })
+
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.error || "AI request failed"
+          );
+        }
+
+        thinking.textContent =
+          "Taurus AI: " + data.reply;
+
+      } catch (error) {
+
+        console.error(error);
+
+        thinking.textContent =
+          "⚠️ Taurus AI could not connect to the AI server.";
+
+      }
+
+      chat.scrollTop = chat.scrollHeight;
     }
+
   </script>
 
 </body>
