@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taurus AI</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #0b0b12;
+      color: white;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 900px;
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 5px;
+      border-bottom: 1px solid #252535;
+    }
+
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    header span {
+      color: #aaa;
+      font-size: 14px;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 70px 10px 30px;
+    }
+
+    h1 {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .hero > p {
+      color: #aaa;
+      margin-bottom: 35px;
+    }
+
+    .chat {
+      min-height: 120px;
+      text-align: left;
+      margin: auto;
+      max-width: 700px;
+    }
+
+    .msg {
+      padding: 14px 18px;
+      border-radius: 15px;
+      margin-bottom: 12px;
+      background: #181824;
+    }
+
+    .suggestions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      background: #24243a;
+      color: white;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #343452;
+    }
+
+    .composer {
+      display: flex;
+      gap: 10px;
+      max-width: 700px;
+      margin: 20px auto;
+    }
+
+    input {
+      flex: 1;
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid #33334a;
+      background: #15151f;
+      color: white;
+      outline: none;
+    }
+
+    .send {
+      background: #ffffff;
+      color: #000;
+      font-weight: bold;
+    }
+
+    small {
+      color: #777;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 36px;
+      }
+
+      .composer {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="app">
+
+    <header>
+      <div class="logo">♉ Taurus AI</div>
+      <span>AI Assistant</span>
+    </header>
+
+    <section class="hero">
+
+      <h1>Build. Ask. Create.</h1>
+
+      <p>Your AI workspace is getting ready.</p>
+
+      <div id="chat" class="chat">
+        <div class="msg">
+          👋 Hi! I'm Taurus AI. What can I help you with?
+        </div>
+      </div>
+
+      <div class="suggestions">
+        <button onclick="ask('Explain this simply')">
+          Explain simply
+        </button>
+
+        <button onclick="ask('Give me an idea')">
+          Give me an idea
+        </button>
+
+        <button onclick="ask('Make a plan')">
+          Make a plan
+        </button>
+      </div>
+
+      <div class="composer">
+
+        <input
+          id="prompt"
+          type="text"
+          placeholder="Ask Taurus AI..."
+          onkeydown="if(event.key==='Enter') send()"
+        >
+
+        <button class="send" onclick="send()">
+          Send
+        </button>
+
+      </div>
+
+      <small>
+        Taurus AI • Demo version
+      </small>
+
+    </section>
+
+  </main>
+
+  <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("prompt");
+
+    function addMessage(text, type) {
+      const div = document.createElement("div");
+      div.className = "msg " + type;
+      div.textContent = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function ask(text) {
+      input.value = text;
+      send();
+    }
+
+    function send() {
+      const text = input.value.trim();
+
+      if (!text) return;
+
+      addMessage("You: " + text, "user");
+
+      input.value = "";
+
+      setTimeout(() => {
+        addMessage(
+          "Taurus AI: I'm currently in demo mode. Real AI will be connected soon 🚀",
+          "bot"
+        );
+      }, 500);
+    }
+  </script>
+
+</body>
+</html>
