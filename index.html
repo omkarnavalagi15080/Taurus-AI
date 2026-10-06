@@ -3,272 +3,289 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Taurus AI</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
-
     body {
-      min-height: 100vh;
-      background: #0b0b12;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
       color: white;
-      display: flex;
-      justify-content: center;
     }
 
-    .app {
-      width: 100%;
-      max-width: 900px;
+    .container {
+      max-width: 700px;
+      margin: auto;
       padding: 20px;
     }
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 15px 5px;
-      border-bottom: 1px solid #252535;
-    }
-
-    .logo {
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    header span {
-      color: #aaa;
-      font-size: 14px;
-    }
-
-    .hero {
-      text-align: center;
-      padding: 70px 10px 30px;
-    }
-
     h1 {
-      font-size: 48px;
-      margin-bottom: 12px;
+      text-align: center;
     }
 
-    .hero > p {
+    #status {
+      text-align: center;
       color: #aaa;
-      margin-bottom: 35px;
+      margin: 15px 0;
     }
 
-    .chat {
-      min-height: 120px;
-      text-align: left;
-      margin: auto;
-      max-width: 700px;
-    }
-
-    .msg {
-      padding: 14px 18px;
-      border-radius: 15px;
-      margin-bottom: 12px;
-      background: #181824;
-    }
-
-    .suggestions {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin: 20px 0;
-    }
-
-    button {
-      border: none;
+    #chat {
+      height: 60vh;
+      overflow-y: auto;
+      padding: 15px;
+      background: #1b1b1b;
       border-radius: 12px;
-      padding: 12px 18px;
-      background: #24243a;
-      color: white;
-      cursor: pointer;
     }
 
-    button:hover {
-      background: #343452;
+    .message {
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 10px;
+      white-space: pre-wrap;
     }
 
-    .composer {
+    .user {
+      background: #333;
+      text-align: right;
+    }
+
+    .bot {
+      background: #222;
+    }
+
+    .input-area {
       display: flex;
-      gap: 10px;
-      max-width: 700px;
-      margin: 20px auto;
+      gap: 8px;
+      margin-top: 12px;
     }
 
     input {
       flex: 1;
-      padding: 15px;
-      border-radius: 12px;
-      border: 1px solid #33334a;
-      background: #15151f;
-      color: white;
-      outline: none;
+      padding: 13px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
     }
 
-    .send {
-      background: #ffffff;
-      color: #000;
+    button {
+      padding: 13px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
       font-weight: bold;
     }
 
-    small {
-      color: #777;
+    #send {
+      background: white;
+      color: black;
     }
 
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 36px;
-      }
-
-      .composer {
-        flex-direction: column;
-      }
+    #load {
+      display: block;
+      margin: 15px auto;
+      background: #444;
+      color: white;
     }
   </style>
 </head>
 
 <body>
 
-  <main class="app">
+<div class="container">
 
-    <header>
-      <div class="logo">🐂 Taurus AI</div>
-      <span>AI Assistant</span>
-    </header>
+  <h1>🤖 Taurus AI</h1>
 
-    <section class="hero">
+  <div id="status">
+    Local AI is not loaded
+  </div>
 
-      <h1>Build. Ask. Create.</h1>
+  <button id="load">
+    Load Local AI
+  </button>
 
-      <p>Your AI workspace is ready.</p>
+  <div id="chat"></div>
 
-      <div id="chat" class="chat">
-        <div class="msg">
-          👋 Hi! I'm Taurus AI. What can I help you with?
-        </div>
-      </div>
+  <div class="input-area">
+    <input
+      id="input"
+      type="text"
+      placeholder="Ask Taurus AI..."
+    >
 
-      <div class="suggestions">
+    <button id="send">
+      Send
+    </button>
+  </div>
 
-        <button onclick="ask('Explain this simply')">
-          Explain simply
-        </button>
+</div>
 
-        <button onclick="ask('Give me an idea')">
-          Give me an idea
-        </button>
+<script type="module">
 
-        <button onclick="ask('Make a plan')">
-          Make a plan
-        </button>
+  import {
+    CreateMLCEngine
+  } from "https://esm.run/@mlc-ai/web-llm";
 
-      </div>
+  const MODEL =
+    "Llama-3.2-1B-Instruct-q4f16_1-MLC";
 
-      <div class="composer">
+  let engine = null;
 
-        <input
-          id="prompt"
-          type="text"
-          placeholder="Ask Taurus AI..."
-          onkeydown="if(event.key==='Enter') send()"
-        >
+  const chat = document.getElementById("chat");
+  const input = document.getElementById("input");
+  const sendButton = document.getElementById("send");
+  const loadButton = document.getElementById("load");
+  const status = document.getElementById("status");
 
-        <button class="send" onclick="send()">
-          Send
-        </button>
+  function addMessage(text, type) {
 
-      </div>
+    const div = document.createElement("div");
 
-      <small>
-        Taurus AI • AI Assistant
-      </small>
+    div.className = "message " + type;
 
-    </section>
+    div.textContent = text;
 
-  </main>
+    chat.appendChild(div);
 
-  <script>
+    chat.scrollTop = chat.scrollHeight;
 
-    const chat = document.getElementById("chat");
-    const input = document.getElementById("prompt");
+    return div;
+  }
 
-    function addMessage(text, type) {
-      const div = document.createElement("div");
+  loadButton.addEventListener("click", async () => {
 
-      div.className = "msg " + type;
-      div.textContent = text;
+    try {
 
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
+      loadButton.disabled = true;
 
-      return div;
+      status.textContent =
+        "Downloading local AI model... Please wait 🤖";
+
+      engine = await CreateMLCEngine(
+        MODEL,
+        {
+          initProgressCallback: (progress) => {
+
+            if (progress.text) {
+              status.textContent =
+                progress.text;
+            }
+
+          }
+        }
+      );
+
+      status.textContent =
+        "✅ Taurus AI is ready!";
+
+      loadButton.textContent =
+        "AI Ready";
+
+    } catch (error) {
+
+      console.error(error);
+
+      status.textContent =
+        "❌ Local AI could not load.";
+
+      loadButton.disabled = false;
+
     }
 
-    function ask(text) {
-      input.value = text;
-      send();
+  });
+
+  async function send() {
+
+    const text = input.value.trim();
+
+    if (!text) return;
+
+    if (!engine) {
+
+      addMessage(
+        "Please load the Local AI first.",
+        "bot"
+      );
+
+      return;
+
     }
 
-    async function send() {
+    addMessage(
+      text,
+      "user"
+    );
 
-      const text = input.value.trim();
+    input.value = "";
 
-      if (!text) return;
-
-      addMessage("You: " + text, "user");
-
-      input.value = "";
-
-      const thinking = addMessage(
+    const thinking =
+      addMessage(
         "Taurus AI is thinking... 🤖",
         "bot"
       );
 
-      try {
+    try {
 
-        const response = await fetch("/api/chat", {
+      const response =
+        await engine.chat.completions.create({
 
-          method: "POST",
+          messages: [
 
-          headers: {
-            "Content-Type": "application/json"
-          },
+            {
+              role: "system",
+              content:
+                "You are Taurus AI, a helpful, friendly and concise AI assistant."
+            },
 
-          body: JSON.stringify({
-            message: text
-          })
+            {
+              role: "user",
+              content: text
+            }
+
+          ],
+
+          temperature: 0.7,
+
+          max_tokens: 300
 
         });
 
-        const data = await response.json();
+      const reply =
+        response.choices[0]?.message?.content ||
+        "Sorry, I couldn't generate a response.";
 
-        if (!response.ok) {
-          throw new Error(
-            data.error || "AI request failed"
-          );
-        }
+      thinking.textContent =
+        reply;
 
-        thinking.textContent =
-          "Taurus AI: " + data.reply;
+    } catch (error) {
 
-      } catch (error) {
-  console.error("TAURUS FRONTEND ERROR:", error);
+      console.error(error);
 
-  thinking.textContent =
-    "⚠️ Taurus AI Error: " + error.message;
-}
+      thinking.textContent =
+        "⚠️ Local AI error: " +
+        error.message;
 
-      chat.scrollTop = chat.scrollHeight;
     }
 
-  </script>
+  }
+
+  sendButton.addEventListener(
+    "click",
+    send
+  );
+
+  input.addEventListener(
+    "keydown",
+    (event) => {
+
+      if (event.key === "Enter") {
+        send();
+      }
+
+    }
+  );
+
+</script>
 
 </body>
 </html>
