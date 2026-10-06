@@ -1,4 +1,4 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({
       error: "Method not allowed"
@@ -8,16 +8,13 @@ export default async function handler(req, res) {
   try {
     const { message } = req.body || {};
 
-    if (!message?.trim()) {
+    if (!message || !message.trim()) {
       return res.status(400).json({
         error: "Message is required"
       });
     }
 
-    // Check API key
     const apiKey = process.env.OPENAI_API_KEY;
-
-    console.log("API KEY EXISTS:", !!apiKey);
 
     if (!apiKey) {
       return res.status(500).json({
@@ -25,14 +22,13 @@ export default async function handler(req, res) {
       });
     }
 
-    // Send request to OpenAI
     const response = await fetch(
       "https://api.openai.com/v1/responses",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
+          Authorization: `Bearer ${apiKey}`
         },
         body: JSON.stringify({
           model: "gpt-5-mini",
@@ -53,9 +49,7 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       return res.status(response.status).json({
-        error:
-          data.error?.message ||
-          "OpenAI request failed"
+        error: data.error?.message || "OpenAI request failed"
       });
     }
 
@@ -77,3 +71,4 @@ export default async function handler(req, res) {
       error: error.message || "Server error"
     });
   }
+};
