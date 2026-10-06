@@ -259,13 +259,11 @@
           "Taurus AI: " + data.reply;
 
       } catch (error) {
+  console.error("TAURUS FRONTEND ERROR:", error);
 
-        console.error(error);
-
-        thinking.textContent =
-          "⚠️ Taurus AI could not connect to the AI server.";
-
-      }
+  thinking.textContent =
+    "⚠️ Taurus AI Error: " + error.message;
+}
 
       chat.scrollTop = chat.scrollHeight;
     }
